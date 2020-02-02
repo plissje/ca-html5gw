@@ -107,6 +107,7 @@ system_prep(){
 gather_info(){
   print_head "Step 2: Collecting user provided information"
   done=0
+  # Get the FQDN for the server
   while : ; do
     read -p 'Please enter fully qualified domain name or hostname: ' hostvar
     print_info "You entered $hostvar, is this correct (Yes or No)? "
@@ -121,6 +122,7 @@ gather_info(){
     fi
   done
   
+  # Get the keystore password
   while : ; do
     read -p 'Please enter the keystore password: ' keystorepass
     print_info "You entered $keystorepass, is this correct (Yes or No)? "
@@ -135,6 +137,39 @@ gather_info(){
     fi
   done
 
+  # Get certificate details
+  while : ; do
+    read -p 'Country Name:  ' cert_countryname
+    read -p 'State:         ' cert_state
+    read -p 'City:          ' cert_city
+    read -p 'Company:       ' cert_company
+    read -p 'OrgUnit:       ' cert_orgunit
+    read -p 'IP:            ' cert_ipaddr
+    print_info "Are you sure you entered the correct details (Yes or No)? "
+    select yn in "Yes" "No"; do
+      case $yn in 
+        Yes ) done=1; break;;
+        No ) echo ""; break;; 
+      esac
+    done
+    if [[ "$done" -ne 0 ]]; then
+      # Extract hostname from FQDN
+      althostname=$(echo "$hostvar" | cut -d'.' -f1)
+
+      # SED GOES HERE
+      sed -i "s/COUNTRY/${cert_countryname}/g" guac-ssl.cnf
+      sed -i "s/STATE/${cert_state}/g" guac-ssl.cnf
+      sed -i "s/CITY/${cert_city}/g" guac-ssl.cnf
+      sed -i "s/COMPANY/${cert_company}/g" guac-ssl.cnf
+      sed -i "s/ORGUNIT/${cert_orgunit}/g" guac-ssl.cnf
+      sed -i "s/COMMONNAME/${hostvar}/g" guac-ssl.cnf
+      sed -i "s/ALTHOSTNAME/${althostname}/g" guac-ssl.cnf
+      sed -i "s/ALTHOSTIP/${cert_ipaddr}/g" guac-ssl.cnf
+
+      break
+    fi
+
+  done
 }
 install_tomcat(){
   print_head "Step 3: Installing and configuring Apache Tomcat"

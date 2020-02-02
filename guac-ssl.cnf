@@ -15,18 +15,18 @@ req_extensions     = v3_req
 
 # distinguished_name
 [ req_distinguished_name ]
-countryName            = "IL"                     # C=
-stateOrProvinceName    = "Haifa"                  # ST=
-localityName           = "Haifa"	              # L=
-organizationName       = "ZIM"	                  # O=
-organizationalUnitName = "InfoSec"                # OU=
-commonName             = "html5.bulwarx.local"    # CN=
+countryName            = "COUNTRY"
+stateOrProvinceName    = "STATE"
+localityName           = "CITY"
+organizationName       = "COMPANY"
+organizationalUnitName = "ORGUNIT"
+commonName             = "COMMONNAME"  
 
 # req_extensions
 [ v3_req ]
 subjectAltName = @alt_names
 
 [ alt_names ]
-DNS.0 = html5.bulwarx.local
-DNS.1 = html5
-IP.1 = 192.168.25.237
+DNS.0 = COMMONNAME
+DNS.1 = ALTHOSTNAME
+IP.1 = ALTHOSTIP
