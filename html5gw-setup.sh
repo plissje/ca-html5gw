@@ -120,6 +120,21 @@ gather_info(){
       break
     fi
   done
+  
+  while : ; do
+    read -p 'Please enter the keystore password: ' keystorepass
+    print_info "You entered $keystorepass, is this correct (Yes or No)? "
+    select yn in "Yes" "No"; do
+      case $yn in 
+        Yes ) done=1; break;;
+        No ) echo ""; break;; 
+      esac
+    done
+    if [[ "$done" -ne 0 ]]; then
+      break
+    fi
+  done
+
 }
 install_tomcat(){
   print_head "Step 3: Installing and configuring Apache Tomcat"
@@ -129,7 +144,7 @@ install_tomcat(){
   sudo useradd -s /bin/nologin -g tomcat -d /opt/tomcat tomcat >> html5gw.log
   
   print_info "Searching for correct Apache URL"
-  for i in {01..75}
+  for i in {50..60}
   do
     local test=`curl -Is http://www-us.apache.org/dist/tomcat/tomcat-8/v8.5."$i"/bin/apache-tomcat-8.5."$i".tar.gz | head -n 1`
     if [[ $test == *200* ]]; then
@@ -174,14 +189,18 @@ install_tomcat(){
   # Configure Tomcat Self Signed Certificate
   print_info "Creating Tomcat Self Signed Certificate"
   mkdir /opt/secrets
-  keytool -genkeypair -alias psmgw -keyalg RSA -keystore /opt/secrets/keystore -ext san=dns:$hostvar -keypass "Cyberark1" -storepass "Cyberark1" -dname "cn=$hostvar, ou=POC, o=POC, c=US" >> html5gw.log 2>&1
+  machine_ip=$(hostname --ip-address)
+  keytool -genkeypair -alias psmgw -keyalg RSA -keystore /opt/secrets/keystore -ext san=dns:$hostvar,ip:$machine_ip -keypass "$keystorepass" -storepass "$keystorepass" -dname "cn=$hostvar, ou=InfoSec, o=ZIM, c=IL" >> html5gw.log 2>&1
 	
   # Verify Keytool Import was successful
-  testkey "/opt/secrets/keystore" "psmgw" "Cyberark1"
+  testkey "/opt/secrets/keystore" "psmgw" "$keystorepass"
   
   # Export certificate in .cer format
   print_info "Exporting Tomcat Certificate from Keystore"
-  keytool -export -keystore /opt/secrets/keystore -alias psmgw -file tomcat.cer -storepass "Cyberark1" >> html5gw.log 2>&1
+  keytool -export -keystore /opt/secrets/keystore -alias psmgw -file tomcat.cer -storepass "$keystorepass" >> html5gw.log 2>&1
+
+  # Update the server.xml with the selected password
+  sed -i "s/PASSWORD/${keystorepass}/g" server.xml
 
   # Copy over the existing Tomcat Server Configuration file
   cp server.xml /opt/tomcat/conf/server.xml
@@ -306,9 +325,9 @@ update_guacssl_config(){
 generate_guacd_certs(){
   print_info "Generating self signed certificates for Guacamole"
   openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout /opt/secrets/key.pem -out /opt/secrets/cert.crt -config guac-ssl.cnf > /dev/null 2>&1
-  keytool -import -alias psmgw_guacd_cert -keystore /opt/secrets/keystore -trustcacerts -file /opt/secrets/cert.crt -storepass "Cyberark1" -noprompt >> html5gw.log 2>&1
+  keytool -import -alias psmgw_guacd_cert -keystore /opt/secrets/keystore -trustcacerts -file /opt/secrets/cert.crt -storepass "$keystorepass" -noprompt >> html5gw.log 2>&1
   # Verify Keytool Import was successful
-  testkey "/opt/secrets/keystore" "psmgw_guacd_cert" "Cyberark1"
+  testkey "/opt/secrets/keystore" "psmgw_guacd_cert" "$keystorepass"
   print_success "Guacamole certificates imported into Apache Keystore" 
 	
   # Import guacd certs into the Java key store
