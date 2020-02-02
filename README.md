@@ -14,4 +14,4 @@ Intended for installation on an updated minimal CentOS 7 Server. General install
 5. The tomcat certificate is exported from the /opt/secrets/keystore and will be located in the directory the script is ran from with the name "tomcat.cer". You can import this on client workstations to trust the connection to the HTML5GW.
 
 # Notes / Prerequisites
-Passwords for the Apache Keystore are hard coded in the script and set to CyberArk1 for demonstration purposes. Change these if you would like to set them to something else.
+This is a modified version of the original script which needs an input for both the keystore passwords and the certificate details (The installer uses a self-siged certificate, but the keystore has a SAN configuration which simplifies the process of creating a CSR)
