@@ -124,7 +124,7 @@ gather_info(){
   
   # Get the keystore password
   while : ; do
-    read -p 'Please enter the keystore password: ' keystorepass
+    read -p 'Please enter the keystore password (MUST BE MORE THAN 6 CHARACTERS): ' keystorepass
     print_info "You entered $keystorepass, is this correct (Yes or No)? "
     select yn in "Yes" "No"; do
       case $yn in 
