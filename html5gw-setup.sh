@@ -109,7 +109,7 @@ gather_info(){
   done=0
   # Get the FQDN for the server
   while : ; do
-    read -p 'Please enter fully qualified domain name or hostname: ' hostvar
+    read -p 'Please enter a fully qualified domain name: ' hostvar
     print_info "You entered $hostvar, is this correct (Yes or No)? "
     select yn in "Yes" "No"; do
       case $yn in 
@@ -371,6 +371,10 @@ generate_guacd_certs(){
   # Verify Keytool Import was successful
   testkey "$testpath/lib/security/cacerts" "psmgw_guacd_cert" "changeit"
   print_success "Guacamole certificates imported into Java Keystore"
+
+  # Update permissions on the secrets folder to psmgwuser
+  chown -R root:psmgwuser /opt/secrets
+  print_success "Updated permissions on /opt/secrets to psmgwuser"
 }
 
 restart_services(){
