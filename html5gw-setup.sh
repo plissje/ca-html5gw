@@ -196,6 +196,7 @@ install_tomcat(){
   # Verify Apache Tomcat tar.gz file was downloaded, if not - Exit
   if [ -f $PWD/apache* ]; then
     print_info "Download succesfull - Installing Now"
+    mkdir /opt/tomcat
     tar -xzvf apache-tomcat-8.5."$i".tar.gz -C /opt/tomcat --strip-components=1 >> html5gw.log
   else
     print_error "Apache Tomcat could not be downloaded. Exiting now..."
